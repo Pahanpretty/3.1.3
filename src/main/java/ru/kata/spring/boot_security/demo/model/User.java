@@ -5,7 +5,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.util.Collection;
+import java.util.Set;
 
 
 @Entity(name = "users")
@@ -35,7 +37,17 @@ public class User implements UserDetails {
     @Column(name = "points")
     private int points;
 
-    public User(String name, String surname, int age, int level, int points) {
+    @Column(name = "username")
+    private String username;
+
+    @Column(name = "password")
+    @Size(min=2, message = "Не меньше 5 знаков")
+    private String password;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Role> roles;
+
+    public User(String username, String password ,String name, String surname, int age, int level, int points) {
         this.name = name;
         this.surname = surname;
         this.age = age;
@@ -43,19 +55,21 @@ public class User implements UserDetails {
         this.points = points;
     }
 
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return getRoles();
     }
 
     @Override
     public String getPassword() {
-        return null;
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return username;
     }
 
     @Override
