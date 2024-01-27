@@ -15,7 +15,7 @@
 <body>
 <div align="center">
     <h2>New User</h2>
-    <form th:action="@{/new}" th:method="post" th:object="${user}">
+    <form th:action="@{/admin}" th:method="post" th:object="${user}">
         <table border="0" cellpadding="5">
             <tr>
                 <td>Name:</td>
@@ -54,6 +54,22 @@
                 <td>
                     <label>
                         <input placeholder="points" type="text" th:field="*{points}"/>
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>Password:</td>
+                <td>
+                    <label>
+                        <input placeholder="password" type="password" th:field="*{password}"/>
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>Roles:</td>
+                <td>
+                    <label>
+                        <input placeholder="roles" type="text" th:field="*{roles}"/>
                     </label>
                 </td>
             </tr>

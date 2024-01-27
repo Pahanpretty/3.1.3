@@ -17,7 +17,7 @@
 <div align="center">
     <h3>Edit User</h3>
 
-    <form th:action="@{/edit}" th:method="post" th:object="${user}">
+    <form th:action="@{/admin/edit}" th:method="post" th:object="${user}">
         <input type="hidden" th:name="id" th:value="${user.getId()}"/>
 
         <table border="0" cellpadding="5">
@@ -66,6 +66,22 @@
                 <td>
                     <label>
                         <input type="text" th:field="*{points}"/>
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>Password:</td>
+                <td>
+                    <label>
+                        <input placeholder="password" type="password" th:field="*{password}"/>
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>Roles:</td>
+                <td>
+                    <label>
+                        <input placeholder="roles" type="text" th:field="*{roles}"/>
                     </label>
                 </td>
             </tr>

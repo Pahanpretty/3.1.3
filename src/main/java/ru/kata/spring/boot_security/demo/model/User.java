@@ -2,25 +2,34 @@ package ru.kata.spring.boot_security.demo.model;
 
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 
-@Entity(name = "users")
+@Entity
 @Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "id", unique = true)
     private Long id;
+
+    @Id
+    @Column(name = "username")
+    private String username;
+
+    @Column(name = "password")
+    @Size(min=2, message = "Не меньше 2 знаков")
+    private String password;
 
     @Column(name = "name")
     private String name;
@@ -37,14 +46,16 @@ public class User implements UserDetails {
     @Column(name = "points")
     private int points;
 
-    @Column(name = "username")
-    private String username;
 
-    @Column(name = "password")
-    @Size(min=2, message = "Не меньше 5 знаков")
-    private String password;
+//    @ManyToMany(fetch = FetchType.EAGER)
+//    private Set<Role> roles;
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_username", referencedColumnName = "username"),
+            inverseJoinColumns = @JoinColumn(name = "roles_username", referencedColumnName = "username")
+    )
     private Set<Role> roles;
 
     public User(String username, String password ,String name, String surname, int age, int level, int points) {
@@ -53,13 +64,19 @@ public class User implements UserDetails {
         this.age = age;
         this.level = level;
         this.points = points;
+        this.username = username;
+        this.password = password;
     }
-
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return getRoles();
+        Set<Role> roles = this.getRoles();
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+
+        for (Role role : roles) {
+            authorities.add(new SimpleGrantedAuthority(role.getUsername()));
+        }
+        return authorities; // возвращает список ролей
     }
 
     @Override

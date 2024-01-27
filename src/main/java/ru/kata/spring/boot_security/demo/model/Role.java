@@ -3,9 +3,11 @@ package ru.kata.spring.boot_security.demo.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import java.util.Set;
 
 @Entity
@@ -16,25 +18,26 @@ import java.util.Set;
 public class Role implements GrantedAuthority {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @Column(name = "id")
-    private Long id;
+    @Column(name = "username")
+    private String username;
 
-    @Column(name = "name")
-    private String name;
+    @NotEmpty
+    @NonNull
+    @Column(name = "role", unique = true)
+    private String role;
 
     @Transient
     @ManyToMany(mappedBy = "roles")
     private Set<User> users;
 
 
-    public Role(Long id) {
-        this.id = id;
+    public Role(String role) {
+        this.role = role;
     }
 
     @Override
     public String getAuthority() {
-        return getName();
+        return getRole();
     }
 }
 
