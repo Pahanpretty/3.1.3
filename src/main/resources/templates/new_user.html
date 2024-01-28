@@ -18,6 +18,14 @@
     <form th:action="@{/admin}" th:method="post" th:object="${user}">
         <table border="0" cellpadding="5">
             <tr>
+                <td>Username:</td>
+                <td>
+                    <label>
+                        <input placeholder="Username" type="text" th:field="*{username}"/>
+                    </label>
+                </td>
+            </tr>
+            <tr>
                 <td>Name:</td>
                 <td>
                     <label>

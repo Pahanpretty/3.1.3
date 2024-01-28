@@ -35,16 +35,16 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="user : ${users1}">
-            <td th:text="${user.id}"></td>
-            <td th:text="${user.username}"></td>
-            <td th:text="${user.name}"></td>
-            <td th:text="${user.surname}"></td>
-            <td th:text="${user.age}"></td>
-            <td th:text="${user.level}"></td>
-            <td th:text="${user.points}"></td>
+        <tr th:object="${users1}">
+            <td th:text="*{id}"></td>
+            <td th:text="*{username}"></td>
+            <td th:text="*{name}"></td>
+            <td th:text="*{surname}"></td>
+            <td th:text="*{age}"></td>
+            <td th:text="*{level}"></td>
+            <td th:text="*{points}"></td>
             <td>
-                <span th:each="role: ${user.getRoles()}" >
+                <span th:each="role: ${users1.getRoles()}">
                     <span th:text="${role.getUsername()} + ', '"/>
                 </span>
             </td>
