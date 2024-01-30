@@ -18,8 +18,8 @@ import java.util.Set;
 public class Role implements GrantedAuthority {
 
     @Id
-    @Column(name = "username")
-    private String username;
+    @Column(name = "id")
+    private Long id;
 
     @NotEmpty
     @NonNull
@@ -27,11 +27,15 @@ public class Role implements GrantedAuthority {
     private String role;
 
     @Transient
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles") // Тут пишем название поля из User, которая связан с этой сущностью
     private Set<User> users;
 
 
     public Role(String role) {
+        this.role = role;
+    }
+    public Role(Long id, String role) {
+        this.id = id;
         this.role = role;
     }
 
@@ -42,7 +46,7 @@ public class Role implements GrantedAuthority {
 
     @Override
     public String toString() {
-        return role + ",";
+        return role + ",\b";
     }
 }
 

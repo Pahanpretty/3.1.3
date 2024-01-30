@@ -89,8 +89,14 @@
                 <td>
                     <input type="submit" value="Save"/>
                 </td>
+                <td>
+                    <input type="button" value="Back" th:action="@{/admin}"  th:method="post"/>
+                </td>
             </tr>
         </table>
+    </form>
+    <form th:action="@{/logout}" th:method="post">
+        <input type="submit" value="Logout" class="btn btn-primary"/>
     </form>
 </div>
 </body>

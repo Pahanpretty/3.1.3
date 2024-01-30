@@ -20,22 +20,19 @@ import java.util.Set;
 @AllArgsConstructor
 public class User implements UserDetails {
 
-    @Column(name = "id", unique = true)
-    private Long id;
-
     @Id
-    @Column(name = "username")
-    private String username;
-
-    @Column(name = "password")
-    @Size(min=2, message = "Не меньше 2 знаков")
-    private String password;
+    @Column(name = "id")
+    private Long id;
 
     @Column(name = "name")
     private String name;
 
     @Column(name = "surname")
     private String surname;
+
+    @Column(name = "password")
+    @Size(min=2, message = "Не меньше 2 знаков")
+    private String password;
 
     @Column(name = "age")
     private int age;
@@ -47,24 +44,19 @@ public class User implements UserDetails {
     private int points;
 
 
-//    @ManyToMany(fetch = FetchType.EAGER)
-//    private Set<Role> roles;
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",
-            joinColumns = @JoinColumn(name = "user_username", referencedColumnName = "username"),
-            inverseJoinColumns = @JoinColumn(name = "roles_username", referencedColumnName = "username")
-    )
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<Role> roles;
 
-    public User(String username, String password ,String name, String surname, int age, int level, int points) {
+    public User(String password ,String name, String surname, int age, int level, int points) {
         this.name = name;
         this.surname = surname;
         this.age = age;
         this.level = level;
         this.points = points;
-        this.username = username;
         this.password = password;
     }
 
@@ -74,7 +66,7 @@ public class User implements UserDetails {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
 
         for (Role role : roles) {
-            authorities.add(new SimpleGrantedAuthority(role.getUsername()));
+            authorities.add(new SimpleGrantedAuthority(role.getRole()));
         }
         return authorities; // возвращает список ролей
     }
@@ -85,8 +77,8 @@ public class User implements UserDetails {
     }
 
     @Override
-    public String getUsername() {
-        return username;
+    public String getUsername() { // тут надо передавать то что будет у нас вместо логина
+        return name;
     }
 
     @Override

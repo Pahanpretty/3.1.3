@@ -4,45 +4,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import ru.kata.spring.boot_security.demo.dao.RoleDAO;
-import ru.kata.spring.boot_security.demo.dao.UserRepository;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.service.UserService;
 import ru.kata.spring.boot_security.demo.service.UserServiceImpl;
 import ru.kata.spring.boot_security.demo.util.UserValidator;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Set;
 
 
 @Controller
+@RequestMapping("/admin")
 public class UserController {
 
     private final UserServiceImpl userService;
     private final RoleDAO roleDAO;
-    private final UserRepository userRepository;
     @Autowired
-    public UserController(UserServiceImpl userService, UserRepository userRepository, UserValidator userValidator, RoleDAO roleDAO) {
+    public UserController(UserServiceImpl userService, UserValidator userValidator, RoleDAO roleDAO) {
         this.userService = userService;
-        this.userRepository = userRepository;
         this.userValidator = userValidator;
         this.roleDAO = roleDAO;
     }
 
     private final UserValidator userValidator;
 
-
-
-
-    @GetMapping("/admin")
+    @GetMapping("/")
     public String getUsersListForm(Model model) {
         model.addAttribute("users", userService.getAllUsers());
         return "/list";
@@ -79,7 +68,7 @@ public class UserController {
 
 //////////////////////////////edit/update/showById/////////////////////////////////////////////
 
-    @GetMapping("/admin/edit")
+    @GetMapping("/edit")
     public ModelAndView editUserForm(@RequestParam Long id) {
         ModelAndView mav = new ModelAndView("/edit_user");
         User user = userService.getUserById(id);
@@ -93,7 +82,7 @@ public class UserController {
 //        return "redirect:/";
 //    }
 
-    @PostMapping("/admin/edit")
+    @PostMapping("/edit")
     public String updateUser(@RequestParam("id") long id,
                              @ModelAttribute("user") @Valid User user, BindingResult bindingResult) {
         if (bindingResult.hasErrors())
@@ -110,9 +99,9 @@ public class UserController {
 //        return "redirect:/";
 //    }
 
-    @PostMapping("/admin")
-    public String deleteUser(@RequestParam("username") String username) {
-        userService.deleteUserByUsername(username);
+    @PostMapping("/")
+    public String deleteUser(@RequestParam("name") String name) {
+        userService.deleteUserByName(name);
         return "redirect:/admin";
     }
 

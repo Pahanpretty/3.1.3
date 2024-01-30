@@ -10,6 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface RoleDAO extends JpaRepository<Role, Long> {
-    @Query("SELECT r FROM Role r WHERE r.username = :username")
-    Optional<Role> getByUsername(@Param("username") String username);
+    @Query("SELECT r FROM Role r WHERE r.id = :id")
+    Optional<Role> getAllById(@Param("id") Long id);
 }
