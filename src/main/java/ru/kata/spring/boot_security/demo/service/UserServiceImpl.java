@@ -23,7 +23,7 @@ import java.util.Set;
 
 
 @Service
-@Transactional(readOnly = true)
+@Transactional()
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     @PersistenceContext
