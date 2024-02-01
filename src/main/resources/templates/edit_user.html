@@ -18,7 +18,7 @@
     <h3>Edit User</h3>
 
     <form th:action="@{/admin/edit}" th:method="post" th:object="${user}">
-        <input type="hidden" th:name="id" th:value="${user.getId()}"/>
+        <input type="hidden" th:field="*{id}" th:value="${user.id}"/>
 
         <table border="0" cellpadding="5">
             <tr>
@@ -81,20 +81,21 @@
                 <td>Roles:</td>
                 <td>
                     <label>
-                        <input placeholder="roles" type="text" th:field="*{roles}"/>
+                        <input placeholder="role" type="text" th:field="*{roles}"/>
                     </label>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <input type="submit" value="Save"/>
-                </td>
-                <td>
-                    <input type="button" value="Back" th:action="@{/admin}"  th:method="post"/>
+                    <input type="submit" value="Save" class="btn btn-primary"/>
                 </td>
             </tr>
         </table>
     </form>
+    <form th:action="@{/admin}" th:method="get">
+        <input type="submit" value="Back" class="btn btn-primary"/>
+    </form>
+    <br><br>
     <form th:action="@{/logout}" th:method="post">
         <input type="submit" value="Logout" class="btn btn-primary"/>
     </form>

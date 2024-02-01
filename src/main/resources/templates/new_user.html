@@ -15,16 +15,8 @@
 <body>
 <div align="center">
     <h2>New User</h2>
-    <form th:action="@{/admin}" th:method="post" th:object="${user}">
+    <form th:action="@{/admin/new}" th:method="post" th:object="${user}">
         <table border="0" cellpadding="5">
-            <tr>
-                <td>Username:</td>
-                <td>
-                    <label>
-                        <input placeholder="Username" type="text" th:field="*{username}"/>
-                    </label>
-                </td>
-            </tr>
             <tr>
                 <td>Name:</td>
                 <td>
@@ -77,20 +69,29 @@
                 <td>Roles:</td>
                 <td>
                     <label>
-                        <input placeholder="roles" type="text" th:field="*{roles}"/>
+                        <select th:name="roles" th:value="*{roles}">
+                            <option th:each="role:${roles}" th:value="${role.id}" th:text="${role.role}" selected/>
+                        </select>
                     </label>
                 </td>
             </tr>
             <tr>
                 <td>
                     <input type="submit" value="Save"
-                           onclick="window.location.href = '/'"/>
+                           class="btn btn-primary"/>
                 </td>
             </tr>
         </table>
     </form>
     <br>
     <br>
+    <form th:action="@{/admin}" th:method="get">
+        <input type="submit" value="Back" class="btn btn-primary"/>
+    </form>
+    <br><br>
+    <form th:action="@{/logout}" th:method="post">
+        <input type="submit" value="Logout" class="btn btn-primary"/>
+    </form>
 </div>
 </body>
 </html>

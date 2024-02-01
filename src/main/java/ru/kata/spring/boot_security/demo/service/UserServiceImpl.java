@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public List<User> getAllUsers() {
-        return userDAO.getAllUsers();
+        return userDAO.findAll();
     }
 
     @Override
@@ -54,25 +54,30 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (userByIdFromDB == null) {
             createRolesIfNotExist();
             user.setPassword(passwordEncoder.encode(user.getPassword()));
-            userDAO.save(user);
+            userDAO.saveAndFlush(user);
         } else throw new RuntimeException("User by id: " + user.getId() + " in DB already exist");
     }
 
     @Override
     @Transactional
-    public void updateUser(User user, Set<Role> roles) {
-        User userFromDB = userDAO.getUserById(user.getId());
-        if (userFromDB != null) {
-            userFromDB.setName(user.getName());
-            userFromDB.setSurname(user.getSurname());
-            userFromDB.setPassword(passwordEncoder.encode(user.getPassword()));
-            userFromDB.setAge(user.getAge());
-            userFromDB.setLevel(user.getLevel());
-            userFromDB.setPoints(user.getPoints());
-            userFromDB.setRoles(roles);
-            userDAO.save(userFromDB);
-        } else throw new RuntimeException("User with this parameters already exist");
-
+    public void updateUser(User user) {
+//        User userFromDB = entityManager.find(User.class, user.getId());
+//        if (userFromDB != null) {
+//            userFromDB.setName(user.getName());
+//            userFromDB.setSurname(userFromDB.getSurname());
+//            userFromDB.setPassword(passwordEncoder.encode(userFromDB.getPassword()));
+//            userFromDB.setAge(userFromDB.getAge());
+//            userFromDB.setLevel(userFromDB.getLevel());
+//            userFromDB.setPoints(userFromDB.getPoints());
+//            createRolesIfNotExist();
+//            userDAO.saveAndFlush(userFromDB);
+//        } else {
+//            throw new RuntimeException("User with this parameters already exist");
+//        }
+//
+//        entityManager.merge(userFromDB);
+        entityManager.merge(user);
+        userDAO.save(user);
     }
 
     @Override
@@ -89,6 +94,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    @Transactional
     public void createRolesIfNotExist() {
         if (roleDAO.findById(1L).isEmpty()) {
             roleDAO.save(new Role(1L, "ROLE_ADMIN"));
@@ -99,12 +105,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void deleteUserById(Long id) {
-        userDAO.deleteUser(id);
+    @Transactional(readOnly = true)
+    public List<Role> getListOfRoles() {
+        return roleDAO.findAll();
     }
 
     @Override
-    @Transactional
+//    @Transactional
     public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
         User user = userDAO.findByName(name);
 
@@ -125,10 +132,27 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    @Transactional
+    public void deleteUserById(Long id) {
+        userDAO.deleteUserById(id);
+    }
+
+
+    @Override
+    @Transactional
     public void deleteUserByName(String name) {
         User user = getUserByName(name);
         if (user != null) {
             userDAO.deleteUserByName(name);
+            entityManager.remove(user);
         }
     }
+
+//    @Override
+//    @Transactional
+//    public void deleteUserByName(String name) {
+//        Query query = entityManager.createQuery("DELETE FROM User u WHERE u.name = :name");
+//        query.setParameter("name", name);
+//        query.executeUpdate();
+//    } // рабочий метод
 }

@@ -25,7 +25,6 @@
         <thead>
         <tr>
             <th scope="col" style="background-color: cornflowerblue">ID</th>
-            <th scope="col" style="background-color: cornflowerblue">Username</th>
             <th scope="col" style="background-color: cornflowerblue">Name</th>
             <th scope="col" style="background-color: cornflowerblue">Surname</th>
             <th scope="col" style="background-color: cornflowerblue">Age</th>
@@ -37,16 +36,13 @@
         <tbody>
         <tr th:object="${users1}">
             <td th:text="*{id}"></td>
-            <td th:text="*{username}"></td>
             <td th:text="*{name}"></td>
             <td th:text="*{surname}"></td>
             <td th:text="*{age}"></td>
             <td th:text="*{level}"></td>
             <td th:text="*{points}"></td>
             <td>
-                <span th:each="role: ${users1.getRoles()}">
-                    <span th:text="${role.getUsername()} + ', '"/>
-                </span>
+                <span th:each="role: ${users1.roles}"></span>
             </td>
         </tr>
         </tbody>
@@ -54,6 +50,10 @@
     <br/>
     <form th:action="@{/logout}" th:method="post">
         <input type="submit" value="Logout" class="btn btn-primary"/>
+    </form>
+    <br><br>
+    <form th:action="@{/}" th:method="get">
+        <input type="submit" value="Back" class="btn btn-primary"/>
     </form>
 </div>
 

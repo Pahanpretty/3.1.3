@@ -44,24 +44,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-//                .antMatchers("/", "/login", "/index", "/error").permitAll()
                 .antMatchers("/user/**").hasAnyRole("ADMIN", "USER")
-//                .antMatchers("/admin/**").hasAuthority("DELETE_USERS")
                 .antMatchers("/admin/**").hasRole("ADMIN").anyRequest()
                 .authenticated()
                 .and()
                 .formLogin()
-                .loginPage("/login")
-//                .defaultSuccessUrl("/new")
-//                .loginProcessingUrl("/a")
-                .successHandler(successUserHandler)
-//                .failureUrl("/login?error")
                 .permitAll()
                 .and()
                 .logout()
                 .logoutSuccessUrl("/") // корневая страница
                 .deleteCookies("JSESSIONID");
-//                .permitAll();
     }
 
     @Bean
