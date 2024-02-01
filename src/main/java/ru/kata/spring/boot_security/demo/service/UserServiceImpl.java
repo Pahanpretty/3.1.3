@@ -23,12 +23,11 @@ import java.util.Set;
 
 
 @Service
-@Transactional()
+@Transactional
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     @PersistenceContext
     private EntityManager entityManager;
-
     private final UserDAO userDAO;
     private final RoleDAO roleDAO;
     private final PasswordEncoder passwordEncoder;
@@ -59,23 +58,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    @Transactional
     public void updateUser(User user) {
-//        User userFromDB = entityManager.find(User.class, user.getId());
-//        if (userFromDB != null) {
-//            userFromDB.setName(user.getName());
-//            userFromDB.setSurname(userFromDB.getSurname());
-//            userFromDB.setPassword(passwordEncoder.encode(userFromDB.getPassword()));
-//            userFromDB.setAge(userFromDB.getAge());
-//            userFromDB.setLevel(userFromDB.getLevel());
-//            userFromDB.setPoints(userFromDB.getPoints());
-//            createRolesIfNotExist();
-//            userDAO.saveAndFlush(userFromDB);
-//        } else {
-//            throw new RuntimeException("User with this parameters already exist");
-//        }
-//
-//        entityManager.merge(userFromDB);
         entityManager.merge(user);
         userDAO.save(user);
     }
@@ -111,7 +94,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-//    @Transactional
     public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
         User user = userDAO.findByName(name);
 
@@ -137,7 +119,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         userDAO.deleteUserById(id);
     }
 
-
     @Override
     @Transactional
     public void deleteUserByName(String name) {
@@ -147,12 +128,4 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             entityManager.remove(user);
         }
     }
-
-//    @Override
-//    @Transactional
-//    public void deleteUserByName(String name) {
-//        Query query = entityManager.createQuery("DELETE FROM User u WHERE u.name = :name");
-//        query.setParameter("name", name);
-//        query.executeUpdate();
-//    } // рабочий метод
 }

@@ -81,7 +81,12 @@
                 <td>Roles:</td>
                 <td>
                     <label>
-                        <input placeholder="role" type="text" th:field="*{roles}"/>
+                        <input type="checkbox" name="roles"
+                               th:each="role : ${roles}"
+                               th:text="${role.role}"
+                               th:value="${role.id}"
+                               th:field="*{roles}"
+                        />
                     </label>
                 </td>
             </tr>

@@ -10,11 +10,9 @@ import ru.kata.spring.boot_security.demo.dao.RoleDAO;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.UserServiceImpl;
-import ru.kata.spring.boot_security.demo.util.UserValidator;
 
 import javax.validation.Valid;
-import java.util.*;
-
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -23,13 +21,11 @@ public class UserController {
     private final UserServiceImpl userService;
     private final RoleDAO roleDAO;
     @Autowired
-    public UserController(UserServiceImpl userService, UserValidator userValidator, RoleDAO roleDAO) {
+    public UserController(UserServiceImpl userService, RoleDAO roleDAO) {
         this.userService = userService;
-        this.userValidator = userValidator;
         this.roleDAO = roleDAO;
     }
 
-    private final UserValidator userValidator;
 
     @GetMapping("")
     public String getUsersListForm(Model model) {
@@ -37,7 +33,7 @@ public class UserController {
         return "/list";
     }
 
-    ////////////////////////////////create new user////////////////////////////////////////
+    ////////////////////////////////create new user//////////////////////////////////////
 
     @GetMapping("/new")
     public String newUser(Model model) {
@@ -58,20 +54,21 @@ public class UserController {
         return "redirect:/admin";
     }
 
-//////////////////////////////edit/update/showById/////////////////////////////////////////////
+//////////////////////////////edit/update/showById//////////////////////////////////
 
     @GetMapping("/edit")
     public ModelAndView editUserForm(@RequestParam Long id) {
         ModelAndView mav = new ModelAndView("/edit_user");
         User user = userService.getUserById(id);
-        Optional<Role> roles = roleDAO.getAllById(id);
-        mav.addObject("roles", roles);
+        List<Role> roles = (List<Role>) roleDAO.findAll();
         mav.addObject("user", user);
+        mav.addObject("roles", roles);
         return mav;
     }
 
     @PostMapping("/edit")
-    public String updateUser(@ModelAttribute User user,  BindingResult bindingResult, Model model) {
+    public String updateUser(@ModelAttribute User user,
+                             BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("user", user);
             model.addAttribute("roles", roleDAO.findAll());
@@ -81,29 +78,6 @@ public class UserController {
         return "redirect:/admin";
     }
 
-//    @PostMapping("/edit")
-//    public String saveUser(@Valid User user,
-//                           BindingResult bindingResult, Model model) {
-//        List<Role> roleList = new ArrayList<>(roleDAO.findAll());
-//        Set<Role> roleSet = new HashSet<>(roleList);
-//        if (bindingResult.hasErrors()) {
-//            model.addAttribute("user", user);
-//            model.addAttribute("roles", roleDAO.findAll());
-//            return "edit_user";
-//        }
-//        userService.updateUser(user, roleSet);
-//        return "redirect:/admin";
-//    }
-
-//    @PostMapping("/edit")
-//    public String updateUser(@ModelAttribute("user") @Valid User user, BindingResult bindingResult) {
-//        if (bindingResult.hasErrors()){
-//            return "/list";
-//        }
-//        userService.updateUser(user, user.getRoles());
-//        return "redirect:/admin";
-//    }
-
 /////////////////////////////////delete///////////////////////////////////////////////
 
     @PostMapping("")
@@ -111,6 +85,4 @@ public class UserController {
         userService.deleteUserByName(name);
         return "redirect:/admin";
     }
-
-
 }
