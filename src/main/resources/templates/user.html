@@ -41,9 +41,7 @@
             <td th:text="*{age}"></td>
             <td th:text="*{level}"></td>
             <td th:text="*{points}"></td>
-            <td>
-                <span th:each="role: ${users1.roles}"></span>
-            </td>
+            <td th:text="${users1.roles}"></td>
         </tr>
         </tbody>
     </table>
