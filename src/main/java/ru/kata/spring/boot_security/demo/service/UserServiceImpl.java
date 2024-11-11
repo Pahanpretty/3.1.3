@@ -1,132 +1,68 @@
 package ru.kata.spring.boot_security.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.dao.RoleDAO;
-import ru.kata.spring.boot_security.demo.dao.UserDAO;
-import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
+import java.util.Optional;
 
 @Service
-@Transactional
-public class UserServiceImpl implements UserService, UserDetailsService {
+@Transactional(readOnly = true)
+public class UserServiceImpl implements UserService {
 
-    @PersistenceContext
-    private EntityManager entityManager;
-    private final UserDAO userDAO;
-    private final RoleDAO roleDAO;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    @Lazy
-    public UserServiceImpl(UserDAO userDAO, RoleDAO roleDAO, PasswordEncoder passwordEncoder) {
-        this.userDAO = userDAO;
-        this.roleDAO = roleDAO;
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Override
-    public List<User> getAllUsers() {
-        return userDAO.findAll();
-    }
-
-    @Override
     @Transactional
-    public void addUser(User user) {
-        User userByIdFromDB = userDAO.getUserById(user.getId());
-
-        if (userByIdFromDB == null) {
-            createRolesIfNotExist();
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            userDAO.saveAndFlush(user);
-        } else throw new RuntimeException("User by id: " + user.getId() + " in DB already exist");
-    }
-
     @Override
-    public void updateUser(User user) {
+    public User save(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        entityManager.merge(user);
-        userDAO.save(user);
+        return userRepository.save(user);
     }
 
     @Override
-    public User getUserById(Long id) {
-        User user = userDAO.getUserById(id);
-        if (user != null) {
-            return userDAO.getUserById(id);
-        } else throw new RuntimeException("User by id: " + id + " in DB not found");
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 
     @Override
-    public User getUserByName(String name) {
-        return userDAO.findByName(name);
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
     }
 
-    @Override
     @Transactional
-    public void createRolesIfNotExist() {
-        if (roleDAO.findById(1L).isEmpty()) {
-            roleDAO.save(new Role(1L, "ROLE_ADMIN"));
+    @Override
+    public void updateUser(User updatedUser) {
+        User user = findById(updatedUser.getId()).get();
+        String newPassword = updatedUser.getPassword();
+
+        if (!newPassword.equals(user.getPassword()) && !newPassword.isEmpty()) {
+            updatedUser.setPassword(passwordEncoder.encode(newPassword));
+        } else {
+            updatedUser.setPassword(user.getPassword());
         }
-        if (roleDAO.findById(2L).isEmpty()) {
-            roleDAO.save(new Role(2L, "ROLE_USER"));
-        }
+
+        userRepository.save(updatedUser);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<Role> getListOfRoles() {
-        return roleDAO.findAll();
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
-        User user = userDAO.findByName(name);
-
-        if (user == null) {
-            throw new UsernameNotFoundException("User " + name + " not found");
-        }
-        return new org.springframework.security.core.userdetails.
-                User(user.getUsername(), user.getPassword(), user.getRoles());
-    }
-
-    @Override
-    public Set<GrantedAuthority> getAuthorities(User user) {
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        for (Role role : user.getRoles()) {
-            authorities.add(new SimpleGrantedAuthority(role.getRole()));
-        }
-        return authorities;
-    }
-
-    @Override
     @Transactional
-    public void deleteUserById(Long id) {
-        userDAO.deleteUserById(id);
+    @Override
+    public void deleteById(Long id) {
+        userRepository.deleteById(id);
     }
 
     @Override
-    @Transactional
-    public void deleteUserByName(String name) {
-        User user = getUserByName(name);
-        if (user != null) {
-            userDAO.deleteUserByName(name);
-            entityManager.remove(user);
-        }
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }
