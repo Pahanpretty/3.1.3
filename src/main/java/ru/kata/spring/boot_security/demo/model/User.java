@@ -1,76 +1,60 @@
 package ru.kata.spring.boot_security.demo.model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-@Entity
-@Table(name = "users")
+/**
+ * Сущность, представляющая пользователя в системе.
+ * Реализует интерфейс UserDetails для интеграции с Spring Security.
+ */
+@Setter
+@Getter
+@NoArgsConstructor
+@ToString
+@Entity(name = "users")
 public class User implements UserDetails {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "email", nullable = false, unique = true)
-    @Email(message = "Email should be valid")
-    @NotEmpty(message = "Name should not be empty")
+    private String username;
+
+    private String lastname;
+
+    @Column(unique = true)
     private String email;
 
-    @Column(name = "name", nullable = false)
-    @NotEmpty(message = "Name should not be empty")
-    @Size(min = 3, max = 30, message = "Name should be between 3 and 30 chars")
-    private String name;
-
-    @Column(name = "age", nullable = false)
-    @Min(value = 0, message = "Age should be greater than 0")
-    private Integer age;
-
-    @Column(name = "password", nullable = false)
     private String password;
 
-    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "users_roles",
-            joinColumns = {@JoinColumn(name = "user_id")},
-            inverseJoinColumns = {@JoinColumn(name = "role_id")}
-    )
-    private List<Role> roles = new ArrayList<>();
+    @ToString.Exclude
+    private boolean enabled;
 
-    public User() {
+    @ManyToMany
+    @ToString.Exclude
+    private Set<Role> roles = new HashSet<>();
 
-    }
-
-    public User(String name, String email, Integer age) {
-        this.name = name;
+    public User(String username, String lastName, String email, String password) {
+        this.username = username;
+        this.lastname = lastName;
         this.email = email;
-        this.age = age;
+        this.password = password;
+        this.enabled = true;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .toList();
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
+        return roles;
     }
 
     @Override
@@ -90,50 +74,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Integer getAge() {
-        return age;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public List<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
-    }
 }
