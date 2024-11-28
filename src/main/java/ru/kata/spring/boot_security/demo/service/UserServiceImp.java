@@ -1,100 +1,85 @@
 package ru.kata.spring.boot_security.demo.service;
 
-import org.springframework.data.domain.Sort;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 
 @Service
-public class UserServiceImp implements UserService, UserDetailsService {
+@Transactional(readOnly = true)
+public class UserServiceImp implements UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    private final RoleService roleService;
-
-    public UserServiceImp(UserRepository userRepository, RoleService roleService) {
+    public UserServiceImp(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.roleService = roleService;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    @Transactional
     @Override
-    public void add(User user) {
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
+    }
+
+    @Override
+    public List<User> findAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    @Transactional
+    public void saveUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(user.getRoles());
         userRepository.save(user);
     }
 
+    @Override
     @Transactional
-    @Override
-    public void update(User user) {
-        userRepository.save(user);
-    }
+    public boolean updateUser(Long id, User updatedUser) {
+        Optional<User> userFromDb = userRepository.findById(id);
+        if (userFromDb.isPresent()) {
+            User existingUser = userFromDb.get();
 
-    @Transactional
-    @Override
-    public void delete(Long id) {
-        userRepository.deleteById(id);
-    }
+            existingUser.setFirstName(updatedUser.getFirstName());
+            existingUser.setLastName(updatedUser.getLastName());
+            existingUser.setEmail(updatedUser.getEmail());
+            existingUser.setAge(updatedUser.getAge());
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll(Sort.by("id"));
-    }
+            if (!updatedUser.getPassword().equals(existingUser.getPassword())) {
+                existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+            }
 
+            existingUser.setRoles(updatedUser.getRoles());
 
-    @Transactional(readOnly = true)
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
-
-        if (user == null) {
-            throw new UsernameNotFoundException(username);
+            userRepository.save(existingUser);
+            return true;
         }
-
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
-
-        return new org.springframework.security.core.userdetails.
-                User(user.getUsername(), user.getPassword(), authorities);
+        return false;
     }
 
-    @Transactional(readOnly = true)
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
-
-    @Transactional(readOnly = true)
     @Override
-    public String getUserRoles(User user) {
-        return user.getRoles().stream()
-                .map(Role::getName)
-                .collect(Collectors.joining(", "));
-    }
-
     @Transactional
-    @Override
-    public void addRoleToUser(String roleName, User user) {
-        Role role = roleService.findByName(roleName);
-        user.getRoles().add(role);
-        userRepository.save(user);
+    public boolean deleteUser(Long userId) {
+        if (userRepository.findById(userId).isPresent()) {
+            userRepository.deleteById(userId);
+            return true;
+        }
+        return false;
     }
 
-    @Transactional(readOnly = true)
     @Override
-    public User findById(Long id) {
-        return userRepository.findById(id).orElse(null);
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
-
 }
+
